@@ -6,6 +6,6 @@ Im in the main frame
 - Drez
 
 
-I am also in the main frame
+I am also in the mainframe
 
 - Tobs

@@ -5,6 +5,13 @@ import numpy as np
 from lxml import objectify
 import pandas as pd
 
+#importing ros dependencies
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+
+
 data = pd.read_csv("/Users/mortenstephansen/Desktop/Projects/PLC-TCP-ROS2-interface/TCP_server/procssing_times_table.csv",sep=";")
 processingTable = data.to_numpy()
 #print(processingTable[13,13])
@@ -40,9 +47,32 @@ class Carrier:
 
 
 
+
+class PlcPublisher(Node):
+
+    def __init__(self):
+        super().__init__('minimal_publisher')
+        self.publisher_ = self.create_publisher(String, 'topic', 10)
+        timer_period =  0.5  # seconds
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
+
+    def timer_callback(self):
+        msg = String()
+        msg.data = 'StationID = ST_PLC_13, CarrierID = 14, TimeDate = 20/04/2023: 08:26:29'
+       # msg.data = '<carrierInformation><stationID>ST_PLC_13</stationID><carrierID>14</carrierID><timeDate>20/04/2023: 08:26:29</timeDate></carrierInformation>'
+        self.publisher_.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.i += 1
+
+
+
 HOST = "172.20.10.2" #172.20.66.38"  # Standard loopback interface address (localhost)
 PORT = 20001  # Port to listen on (non-privileged ports are > 1023)
+rclpy.init()
 
+
+plcpublisher = PlcPublisher()
 
 # The next line opens a socket with the IPv4 address family (socket.AF_INET) using the TCP protocol (socket.SOCK_STREAM)
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -74,6 +104,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             processing_time = current_carrier.proccessingTime()
 
             print(processing_time)
+
+            rclpy.spin_once(plcpublisher)
 
             if not data:
                 break

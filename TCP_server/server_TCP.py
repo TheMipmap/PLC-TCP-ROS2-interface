@@ -49,18 +49,17 @@ class Carrier:
 
 
 class PlcPublisher(Node):
-
     def __init__(self):
         super().__init__('minimal_publisher')
         self.publisher_ = self.create_publisher(String, 'topic', 10)
-        timer_period =  0.5  # seconds
+        timer_period =  0.5 # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
     def timer_callback(self):
+        global current_carrier
         msg = String()
-        msg.data = 'StationID = ST_PLC_13, CarrierID = 14, TimeDate = 20/04/2023: 08:26:29'
-       # msg.data = '<carrierInformation><stationID>ST_PLC_13</stationID><carrierID>14</carrierID><timeDate>20/04/2023: 08:26:29</timeDate></carrierInformation>'
+        msg.data = f'<carrierInformation><stationID>{current_carrier.stationID}</stationID><carrierID>{current_carrier.carrierID}</carrierID><timeDate>{current_carrier.timeDate}</timeDate></carrierInformation>'
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing: "%s"' % msg.data)
         self.i += 1
@@ -97,8 +96,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             except:
                 print("error in carier object")
 
-
+            global current_carrier
             current_carrier = Carrier(carrier_object.stationID, carrier_object.carrierID, carrier_object.timeDate)
+            
 
             current_carrier.info()
             processing_time = current_carrier.proccessingTime()

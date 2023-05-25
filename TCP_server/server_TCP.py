@@ -45,6 +45,7 @@ PORT = 20001  # Port to listen on (non-privileged ports are > 1023)
 
 current_carrier = Carrier('',0,'')
 
+# The next line opens a socket with the IPv4 address family (socket.AF_INET) using the TCP protocol (socket.SOCK_STREAM)
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
     s.listen()
